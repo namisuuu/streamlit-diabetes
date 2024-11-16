@@ -1,20 +1,14 @@
 import numpy as np
 import pandas as pd
-import missingno as mso
 import seaborn as sns
+import missingno as mso
 import warnings
 import os
 import scipy
 
-from sklearn.metrics import recall_score
-from sklearn.metrics import precision_score
-from sklearn.metrics import f1_score
-from sklearn.metrics import accuracy_score
+from sklearn.metrics import recall_score, precision_score, f1_score, accuracy_score, classification_report, confusion_matrix
 from scipy import stats
-from scipy.stats import pearsonr
-from scipy.stats import ttest_ind
-from sklearn.metrics import classification_report
-from sklearn.metrics import confusion_matrix
+from scipy.stats import pearsonr, ttest_ind
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.model_selection import train_test_split
 from imblearn.over_sampling import SMOTE
@@ -22,184 +16,160 @@ from imblearn.over_sampling import SMOTE
 from sklearn.linear_model import LogisticRegression
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.svm import SVC
-from sklearn.naive_bayes import CategoricalNB
-from sklearn.naive_bayes import GaussianNB
+from sklearn.naive_bayes import CategoricalNB, GaussianNB
 from sklearn.tree import DecisionTreeClassifier
 
-df= pd.read_csv('glucovision.csv')
+# Load the dataset
+df = pd.read_csv('glucovision.csv')
 
-df.columns
-columns: (['Pregnancies', 'Glucose', 'BloodPressure', 'SkinThickness', 'Insulin',
-       'BMI', 'DiabetesPedigreeFunction', 'Age', 'Outcome'],
-      dtype='object')
+# Display column names
+print(df.columns)
 
-df.head()
-df.describe()
-df.info()
-df.shape
-df.isna().sum()
-df.nunique()
-df.duplicated().sum()
-df['Outcome'].value_counts()
+# Data exploration
+print(df.head())
+print(df.describe())
+print(df.info())
+print(f"Shape of the dataset: {df.shape}")
+print(f"Number of missing values:\n{df.isna().sum()}")
+print(f"Number of unique values per column:\n{df.nunique()}")
+print(f"Number of duplicated rows: {df.duplicated().sum()}")
+print(f"Outcome value counts:\n{df['Outcome'].value_counts()}")
+
+# List of numerical columns
 num = df.select_dtypes(include=np.number).columns.tolist()
 
-
+# Boxplot and distribution plot for each numerical column using seaborn
 for col in num:
-    plt.figure(figsize=(8, 6))
     sns.boxplot(x=df[col])
-    plt.title(f'Boxplot of {col}')
-plt.show()
-
-for col in num:
-    plt.figure(figsize=(8, 6))  # Adjust figure size if needed
-    sns.histplot(x=df[col])
+    sns.set(style="whitegrid")
+    sns.despine(left=True, bottom=True)
     plt.title(f'Boxplot of {col}')
     plt.show()
 
-from sklearn.preprocessing import MinMaxScaler
-num= num = ['Glucose','Age','BloodPressure','SkinThickness','Insulin']
+for col in num:
+    sns.histplot(x=df[col], kde=True)
+    plt.title(f'Distribution of {col}')
+    plt.show()
 
+# Normalizing specific numerical columns
+num = ['Glucose', 'Age', 'BloodPressure', 'SkinThickness', 'Insulin']
 scaler = MinMaxScaler()
 df[num] = scaler.fit_transform(df[num])
-df
 
-x = df.drop(columns = 'Outcome', axis=1)
+# Splitting the data
+X = df.drop(columns='Outcome', axis=1)
 y = df['Outcome']
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, stratify=y, random_state=2)
 
-from sklearn.model_selection import train_test_split
-
-X_train, X_test, y_train, y_test = train_test_split(x,y, test_size = 0.2, stratify=y, random_state=2)
-
+# Visualization of the Outcome distribution
 sns.countplot(x='Outcome', data=df)
+plt.title('Outcome Distribution')
+plt.show()
 
+# Correlation heatmap
 sns.heatmap(df.corr(), annot=True, cmap="coolwarm")
+plt.title('Correlation Heatmap')
+plt.show()
 
-from sklearn.svm import SVC
-# Inisialisasi model SVM dengan kernel linear
+# Support Vector Machine (SVM) with linear kernel
 svm = SVC(kernel='linear')
-
-# Train model
 svm.fit(X_train, y_train)
-
-# Lakukan prediksi pada data testing
 y_pred = svm.predict(X_test)
 
-# Evaluasi akurasi model
+# Evaluating the SVM model
 accuracy = accuracy_score(y_test, y_pred)
 print(f"Akurasi SVM: {accuracy * 100:.2f}%")
-# Menghitung F1-score
+
 f1 = f1_score(y_test, y_pred, average='weighted')
 print(f"F1-Score: {f1}")
 
-# Menghitung precision
 precision = precision_score(y_test, y_pred, average='weighted')
 print(f"Precision: {precision}")
 
-# Menghitung recall
 recall = recall_score(y_test, y_pred, average='weighted')
 print(f"Recall: {recall}")
 
-# Inisialisasi model Naive Bayes (Gaussian)
+# Naive Bayes (Gaussian) Model
 nb = GaussianNB()
-
-# Train model
 nb.fit(X_train, y_train)
-
-# Lakukan prediksi pada data testing
 y_pred = nb.predict(X_test)
 
-# Evaluasi akurasi model
+# Evaluating the Naive Bayes model
 accuracy = accuracy_score(y_test, y_pred)
 print(f"Akurasi Naive Bayes: {accuracy * 100:.2f}%")
 
-# Menghitung F1-score
 f1 = f1_score(y_test, y_pred, average='weighted')
 print(f"F1-Score: {f1:.2f}")
 
-# Menghitung precision
 precision = precision_score(y_test, y_pred, average='weighted')
 print(f"Precision: {precision}")
 
-# Menghitung recall
 recall = recall_score(y_test, y_pred, average='weighted')
 print(f"Recall: {recall}")
 
+# K-Nearest Neighbors (KNN) - Tuning for the best K value
 scoreListknn = []
 best_knn_model = None
 
 for i in range(1, 21):
     KNclassifier = KNeighborsClassifier(n_neighbors=i)
     KNclassifier.fit(X_train, y_train)
-
-    # Menghitung akurasi dan menyimpan model terbaik
+    
+    # Calculate accuracy and keep the best model
     score = KNclassifier.score(X_test, y_test)
     scoreListknn.append(score)
-
-    # Simpan model jika akurasinya lebih baik
+    
     if best_knn_model is None or score > best_knn_model.score(X_test, y_test):
         best_knn_model = KNclassifier
 
-# Plotting
-plt.plot(range(1, 21), scoreListknn)
+# Plotting the KNN accuracy
+sns.lineplot(x=range(1, 21), y=scoreListknn, marker='o')
 plt.xticks(np.arange(1, 21, 1))
 plt.xlabel("K value")
-plt.ylabel("Score")
+plt.ylabel("Accuracy Score")
 plt.title("KNN Accuracy for Different K Values")
 plt.show()
 
-KNAcc = max(scoreListknn)
-print("KNN best accuracy: {:.2f}%".format(KNAcc * 100))
+knn_acc = max(scoreListknn)
+print("KNN best accuracy: {:.2f}%".format(knn_acc * 100))
 
-# Menghitung F1-score menggunakan model terbaik
+# Evaluating the best KNN model
 y_pred = best_knn_model.predict(X_test)
 f1 = f1_score(y_test, y_pred, average='weighted')
 print(f"F1-Score: {f1}")
 
-# Menghitung precision
 precision = precision_score(y_test, y_pred, average='weighted')
 print(f"Precision: {precision}")
 
-# Menghitung recall
 recall = recall_score(y_test, y_pred, average='weighted')
 print(f"Recall: {recall}")
 
-input_data = (2,264,70,21,176,26.9,0.671,40)
+# Sample prediction using Naive Bayes model
+input_data = (2, 264, 70, 21, 176, 26.9, 0.671, 40)
+input_data_as_numpy_array = np.asarray(input_data).reshape(1, -1)
 
-# changing the input_data to numpy array
-input_data_as_numpy_array = np.asarray(input_data)
+prediction = nb.predict(input_data_as_numpy_array)
+print(prediction)
 
-# reshape the array as we are predicting for one instance
-input_data_reshaped = input_data_as_numpy_array.reshape(1,-1)
-
-prediksi = nb.predict(input_data_reshaped)
-print(prediksi)
-
-if (prediksi[0] == 0):
-  print('bukan penderita diabetes')
+if prediction[0] == 0:
+    print('bukan penderita diabetes')
 else:
-  print('penderita diabetes')
+    print('penderita diabetes')
 
+# Save Naive Bayes model using pickle
 import pickle
 
 filename = 'trained_model.sav'
 pickle.dump(nb, open(filename, 'wb'))
 
-# loading the saved model
+# Loading the saved model
 loaded_model = pickle.load(open('trained_model.sav', 'rb'))
 
-input_data = (2,264,70,21,176,26.9,0.671,40)
+# Predicting a sample data point using the loaded model
+prediction = loaded_model.predict(input_data_as_numpy_array)
+print(prediction)
 
-# changing the input_data to numpy array
-input_data_as_numpy_array = np.asarray(input_data)
-
-# reshape the array as we are predicting for one instance
-input_data_reshaped = input_data_as_numpy_array.reshape(1,-1)
-
-prediksi = loaded_model.predict(input_data_reshaped)
-print(prediksi)
-
-if (prediksi[0] == 0):
-  print('bukan penderita diabetes')
+if prediction[0] == 0:
+    print('bukan penderita diabetes')
 else:
-  print('penderita diabetes')
-
+    print('penderita diabetes')
