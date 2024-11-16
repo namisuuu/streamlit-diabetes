@@ -1,6 +1,5 @@
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
 import missingno as mso
 import seaborn as sns
 import warnings
