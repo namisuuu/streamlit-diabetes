@@ -27,7 +27,7 @@ from sklearn.naive_bayes import CategoricalNB
 from sklearn.naive_bayes import GaussianNB
 from sklearn.tree import DecisionTreeClassifier
 
-df= pd.read_csv('diabetes.csv')
+df= pd.read_csv('glucovision.csv')
 
 df.columns
 Index(['Pregnancies', 'Glucose', 'BloodPressure', 'SkinThickness', 'Insulin',
