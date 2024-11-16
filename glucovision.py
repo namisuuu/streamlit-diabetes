@@ -22,8 +22,10 @@ from sklearn.tree import DecisionTreeClassifier
 # Load the dataset
 df = pd.read_csv('glucovision.csv')
 
-# Display column names
-print(df.columns)
+df.columns
+columns: (['Pregnancies', 'Glucose', 'BloodPressure', 'SkinThickness', 'Insulin',
+       'BMI', 'DiabetesPedigreeFunction', 'Age', 'Outcome'],
+      dtype='object')
 
 # Data exploration
 print(df.head())
