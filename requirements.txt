@@ -3,5 +3,5 @@ pandas
 matplotlib
 streamlit
 missingno 
-scikit
+scikit-learn
 sklearn
