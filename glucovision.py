@@ -29,7 +29,7 @@ from sklearn.tree import DecisionTreeClassifier
 
 df= pd.read_csv('glucovision.csv')
 
-df.columns= (['Pregnancies', 'Glucose', 'BloodPressure', 'SkinThickness', 'Insulin',
+df.columns== (['Pregnancies', 'Glucose', 'BloodPressure', 'SkinThickness', 'Insulin',
        'BMI', 'DiabetesPedigreeFunction', 'Age', 'Outcome'],
       dtype='object')
 
