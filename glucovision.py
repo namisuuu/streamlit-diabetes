@@ -1,6 +1,3 @@
-Sure! Below is the modified version of your code that removes all Matplotlib-related visualizations while keeping the core functionality intact. Instead of visualizing with Matplotlib or Seaborn, you can rely on printed outputs or other methods for analysis.
-
-python
 import numpy as np
 import pandas as pd
 import warnings
