@@ -1,14 +1,13 @@
+Sure! Below is the modified version of your code that removes all Matplotlib-related visualizations while keeping the core functionality intact. Instead of visualizing with Matplotlib or Seaborn, you can rely on printed outputs or other methods for analysis.
+
+python
 import numpy as np
 import pandas as pd
-import seaborn as sns
-import missingno as mso
 import warnings
 import os
 import scipy
 
 from sklearn.metrics import recall_score, precision_score, f1_score, accuracy_score, classification_report, confusion_matrix
-from scipy import stats
-from scipy.stats import pearsonr, ttest_ind
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.model_selection import train_test_split
 from imblearn.over_sampling import SMOTE
@@ -16,16 +15,11 @@ from imblearn.over_sampling import SMOTE
 from sklearn.linear_model import LogisticRegression
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.svm import SVC
-from sklearn.naive_bayes import CategoricalNB, GaussianNB
+from sklearn.naive_bayes import GaussianNB
 from sklearn.tree import DecisionTreeClassifier
 
 # Load the dataset
 df = pd.read_csv('glucovision.csv')
-
-df.columns
-columns: (['Pregnancies', 'Glucose', 'BloodPressure', 'SkinThickness', 'Insulin',
-       'BMI', 'DiabetesPedigreeFunction', 'Age', 'Outcome'],
-      dtype='object')
 
 # Data exploration
 print(df.head())
@@ -40,19 +34,6 @@ print(f"Outcome value counts:\n{df['Outcome'].value_counts()}")
 # List of numerical columns
 num = df.select_dtypes(include=np.number).columns.tolist()
 
-# Boxplot and distribution plot for each numerical column using seaborn
-for col in num:
-    sns.boxplot(x=df[col])
-    sns.set(style="whitegrid")
-    sns.despine(left=True, bottom=True)
-    plt.title(f'Boxplot of {col}')
-    plt.show()
-
-for col in num:
-    sns.histplot(x=df[col], kde=True)
-    plt.title(f'Distribution of {col}')
-    plt.show()
-
 # Normalizing specific numerical columns
 num = ['Glucose', 'Age', 'BloodPressure', 'SkinThickness', 'Insulin']
 scaler = MinMaxScaler()
@@ -62,16 +43,6 @@ df[num] = scaler.fit_transform(df[num])
 X = df.drop(columns='Outcome', axis=1)
 y = df['Outcome']
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, stratify=y, random_state=2)
-
-# Visualization of the Outcome distribution
-sns.countplot(x='Outcome', data=df)
-plt.title('Outcome Distribution')
-plt.show()
-
-# Correlation heatmap
-sns.heatmap(df.corr(), annot=True, cmap="coolwarm")
-plt.title('Correlation Heatmap')
-plt.show()
 
 # Support Vector Machine (SVM) with linear kernel
 svm = SVC(kernel='linear')
@@ -124,13 +95,9 @@ for i in range(1, 21):
     if best_knn_model is None or score > best_knn_model.score(X_test, y_test):
         best_knn_model = KNclassifier
 
-# Plotting the KNN accuracy
-sns.lineplot(x=range(1, 21), y=scoreListknn, marker='o')
-plt.xticks(np.arange(1, 21, 1))
-plt.xlabel("K value")
-plt.ylabel("Accuracy Score")
-plt.title("KNN Accuracy for Different K Values")
-plt.show()
+# Displaying the KNN accuracy
+for k, score in enumerate(scoreListknn, start=1):
+    print(f"K={k}, Accuracy={score * 100:.2f}%")
 
 knn_acc = max(scoreListknn)
 print("KNN best accuracy: {:.2f}%".format(knn_acc * 100))
@@ -175,3 +142,4 @@ if prediction[0] == 0:
     print('bukan penderita diabetes')
 else:
     print('penderita diabetes')
+
